@@ -248,8 +248,15 @@ static CGFloat const kScrollPagePadding = 10.0f;
 - (void)photoZoomingScrollView:(YAPhotoZoomingScrollView *)scrollView
              singleTapDetected:(UITapGestureRecognizer *)tapGR
 {
+  if ([self.delegate respondsToSelector:@selector(photoBrowser:willDismissAtPageIndex:)]) {
+    [self.delegate photoBrowser:self willDismissAtPageIndex:_currentPageIndex];
+  }
   [self dismissViewControllerAnimated:YES
-                           completion:nil];
+                           completion:^{
+                             if ([self.delegate respondsToSelector:@selector(photoBrowser:didDismissAtPageIndex:)]) {
+                               [self.delegate photoBrowser:self didDismissAtPageIndex:_currentPageIndex];
+                             }
+                           }];
 }
 
 - (void)photoZoomingScrollView:(YAPhotoZoomingScrollView *)scrollView

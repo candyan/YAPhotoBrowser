@@ -13,6 +13,7 @@
 @protocol YAPhotoBrowserDelegate <NSObject>
 
 @optional
+- (void)photoBrowser:(YAPhotoBrowser *)photoBrowser willDismissAtPageIndex:(NSUInteger)index;
 - (void)photoBrowser:(YAPhotoBrowser *)photoBrowser didDismissAtPageIndex:(NSUInteger)index;
 - (void)photoBrowser:(YAPhotoBrowser *)photoBrowser longPressActionAtIndex:(NSUInteger)index;
 
