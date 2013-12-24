@@ -277,34 +277,34 @@ static CGFloat const kScrollPagePadding = 10.0f;
 
   // Recycle no longer needed pages
   NSInteger pageIndex;
-	for (YAPhotoZoomingScrollView *page in self.visiblePagesSet) {
+  for (YAPhotoZoomingScrollView *page in self.visiblePagesSet) {
     pageIndex = page.tag;
-		if (pageIndex < (NSUInteger)iFirstIndex || pageIndex > (NSUInteger)iLastIndex) {
-			[self.recycledPagesSet addObject:page];
+    if (pageIndex < (NSUInteger)iFirstIndex || pageIndex > (NSUInteger)iLastIndex) {
+      [self.recycledPagesSet addObject:page];
       [page prepareForReuse];
-			[page removeFromSuperview];
-		}
-	}
-	[self.visiblePagesSet minusSet:self.recycledPagesSet];
+      [page removeFromSuperview];
+    }
+  }
+  [self.visiblePagesSet minusSet:self.recycledPagesSet];
   while (self.recycledPagesSet.count > 2) { // Only keep 2 recycled pages
     [self.recycledPagesSet removeObject:[self.recycledPagesSet anyObject]];
   }
 
-	// Add missing pages
-	for (NSUInteger index = (NSUInteger)iFirstIndex; index <= (NSUInteger)iLastIndex; index++) {
-		if (![self isDisplayingPageForIndex:index]) {
+  // Add missing pages
+  for (NSUInteger index = (NSUInteger)iFirstIndex; index <= (NSUInteger)iLastIndex; index++) {
+    if (![self isDisplayingPageForIndex:index]) {
       // Add new page
-			YAPhotoZoomingScrollView *page = [[YAPhotoZoomingScrollView alloc] init];
+      YAPhotoZoomingScrollView *page = [[YAPhotoZoomingScrollView alloc] init];
       if (_progressTintColor) [page.progressView setTintColor:_progressTintColor];
       page.photoZoomingDelegate = self;
       page.backgroundColor = [UIColor clearColor];
       page.opaque = YES;
 
       [self _layoutPage:page atIndex:index];
-			[self.visiblePagesSet addObject:page];
-			[self.pageScrollView addSubview:page];
-		}
-	}
+      [self.visiblePagesSet addObject:page];
+      [self.pageScrollView addSubview:page];
+    }
+  }
 }
 
 #pragma mark - layout
@@ -333,10 +333,10 @@ static CGFloat const kScrollPagePadding = 10.0f;
 
 - (BOOL)isDisplayingPageForIndex:(NSUInteger)index
 {
-	for (YAPhotoZoomingScrollView *page in self.visiblePagesSet) {
-		if (page.tag == index) return YES;
+  for (YAPhotoZoomingScrollView *page in self.visiblePagesSet) {
+    if (page.tag == index) return YES;
   }
-	return NO;
+  return NO;
 }
 
 #pragma mark - Size
@@ -360,8 +360,8 @@ static CGFloat const kScrollPagePadding = 10.0f;
 - (CGPoint)_contentOffsetForPageAtIndex:(NSUInteger)index
 {
   CGFloat pageWidth = self.pageScrollView.bounds.size.width;
-	CGFloat newOffset = index * pageWidth;
-	return CGPointMake(newOffset, 0);
+  CGFloat newOffset = index * pageWidth;
+  return CGPointMake(newOffset, 0);
 }
 
 - (CGRect)_frameForPageAtIndex:(NSUInteger)index
