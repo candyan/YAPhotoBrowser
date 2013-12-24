@@ -262,7 +262,8 @@ static CGFloat const kProgressViewSize = 50.0f;
 - (void)_handleLongPressGR:(UILongPressGestureRecognizer *)longPressGR
 {
   if (self.photoImage
-      && [self.photoZoomingDelegate respondsToSelector:@selector(photoZoomingScrollView:longPressDetected:)]) {
+      && [self.photoZoomingDelegate respondsToSelector:@selector(photoZoomingScrollView:longPressDetected:)]
+      && longPressGR.state == UIGestureRecognizerStateBegan) {
     [self.photoZoomingDelegate photoZoomingScrollView:self
                                     longPressDetected:longPressGR];
   }
