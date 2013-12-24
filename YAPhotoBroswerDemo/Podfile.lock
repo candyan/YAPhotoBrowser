@@ -1,0 +1,15 @@
+PODS:
+  - FFCircularProgressView (0.3)
+  - SDWebImage (3.5.1):
+    - SDWebImage/Core
+  - SDWebImage/Core (3.5.1)
+
+DEPENDENCIES:
+  - FFCircularProgressView (~> 0.3)
+  - SDWebImage (~> 3.5.1)
+
+SPEC CHECKSUMS:
+  FFCircularProgressView: 972f8c316f6a612a9ca55d7800ade41b51efedf2
+  SDWebImage: a408b548a634b792372e07e753fc1079aff5032a
+
+COCOAPODS: 0.28.0
