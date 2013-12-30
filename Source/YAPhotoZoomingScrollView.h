@@ -20,6 +20,10 @@
 - (void)photoZoomingScrollView:(YAPhotoZoomingScrollView *)scrollView
              longPressDetected:(UILongPressGestureRecognizer *)longPressGR;
 
+- (void)photoZoomingScrollView:(YAPhotoZoomingScrollView *)scrollView
+             willDownloadImage:(SDWebImageManager *)webImageManager
+                   downloadURL:(NSURL *)URL;
+
 @end
 
 @interface YAPhotoZoomingScrollView : UIScrollView<UIScrollViewDelegate>

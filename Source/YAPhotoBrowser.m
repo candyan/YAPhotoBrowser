@@ -267,6 +267,15 @@ static CGFloat const kScrollPagePadding = 10.0f;
   }
 }
 
+- (void)photoZoomingScrollView:(YAPhotoZoomingScrollView *)scrollView
+             willDownloadImage:(SDWebImageManager *)webImageManager
+                   downloadURL:(NSURL *)URL
+{
+  if ([self.delegate respondsToSelector:@selector(photoBrowser:willDownloadImage:downloadURL:)]) {
+    [self.delegate photoBrowser:self willDownloadImage:webImageManager downloadURL:URL];
+  }
+}
+
 #pragma mark - Display
 
 - (void)_displayPages

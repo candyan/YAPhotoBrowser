@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @class YAPhotoBrowser;
+@class SDWebImageManager;
 
 @protocol YAPhotoBrowserDelegate <NSObject>
 
@@ -16,6 +17,9 @@
 - (void)photoBrowser:(YAPhotoBrowser *)photoBrowser willDismissAtPageIndex:(NSUInteger)index;
 - (void)photoBrowser:(YAPhotoBrowser *)photoBrowser didDismissAtPageIndex:(NSUInteger)index;
 - (void)photoBrowser:(YAPhotoBrowser *)photoBrowser longPressActionAtIndex:(NSUInteger)index;
+- (void)photoBrowser:(YAPhotoBrowser *)photoBrowser
+   willDownloadImage:(SDWebImageManager *)webImageManager
+         downloadURL:(NSURL *)URL;
 
 @end
 

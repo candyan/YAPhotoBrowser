@@ -138,6 +138,11 @@ static CGFloat const kProgressViewSize = 50.0f;
     [self.progressView setHidden:NO];
     [self.progressView setProgress:0.2];
 
+    if ([self.photoZoomingDelegate respondsToSelector:@selector(photoZoomingScrollView:willDownloadImage:downloadURL:)]) {
+      [self.photoZoomingDelegate photoZoomingScrollView:self
+                                      willDownloadImage:self.webImageManager
+                                            downloadURL:photoURL];
+    }
     __weak typeof(self) weakSelf = self;
     [self.webImageManager downloadWithURL:photoURL
                                   options:SDWebImageProgressiveDownload | SDWebImageRetryFailed
