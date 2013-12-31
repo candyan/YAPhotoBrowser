@@ -166,6 +166,7 @@ static CGFloat const kProgressViewSize = 50.0f;
 - (void)prepareForReuse
 {
   [self.webImageManager cancelAll];
+  [self.progressView setProgress:0.0];
   self.photoImageView.image = nil;
   self.photoURL = nil;
   self.photoImage = nil;
