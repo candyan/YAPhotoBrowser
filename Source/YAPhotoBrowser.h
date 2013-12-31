@@ -20,10 +20,13 @@
 - (void)photoBrowser:(YAPhotoBrowser *)photoBrowser
    willDownloadImage:(SDWebImageManager *)webImageManager
          downloadURL:(NSURL *)URL;
+- (void)photoBrowser:(YAPhotoBrowser *)photoBrowser willDisplayPhotoAtPageIndex:(NSUInteger)index;
 
 @end
 
 @interface YAPhotoBrowser : UIViewController
+
+@property (nonatomic, assign) NSUInteger totalPages;
 
 @property (nonatomic, weak) id<YAPhotoBrowserDelegate> delegate;
 
@@ -34,5 +37,7 @@
 - (void)setProgressTintColor:(UIColor *)tintColor;
 
 - (UIImage *)photoImageAtIndex:(NSUInteger)index;
+
+- (void)reloadCurrentPhotoPage;
 
 @end

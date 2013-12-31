@@ -48,6 +48,7 @@
     _initialPageIndex = 0;
     _currentPageIndex = 0;
 
+    _totalPages = _photos.count;
   }
   return self;
 }
@@ -104,12 +105,6 @@
                                                          : UIStatusBarAnimationNone)];
 }
 
-- (void)didReceiveMemoryWarning
-{
-  [super didReceiveMemoryWarning];
-  // Dispose of any resources that can be recreated.
-}
-
 - (void)viewWillLayoutSubviews
 {
   [self.pageScrollView setFrame:[self _frameForPageScrollView]];
@@ -122,7 +117,7 @@ static CGFloat const kPagesLabelHeight = 26.0f;
 - (UILabel *)pagesLabel
 {
   if (!_pagesLabel
-      && self.photos.count > 1) {
+      && self.totalPages > 1) {
     CGRect frame = self.view.bounds;
     frame.origin.y = frame.size.height - kPagesLabelHeight;
     frame.size.height = kPagesLabelHeight;
@@ -209,12 +204,12 @@ static CGFloat const kScrollPagePadding = 10.0f;
 
 - (void)setInitialPageIndex:(NSUInteger)pageIndex
 {
-  if (pageIndex >= self.photos.count) pageIndex = self.photos.count - 1;
+  if (pageIndex >= self.totalPages) pageIndex = self.totalPages - 1;
 
   _initialPageIndex = pageIndex;
   _currentPageIndex = pageIndex;
 
-  if (self.photos.count > 1
+  if (self.totalPages > 1
       && [self isViewLoaded]) {
     [self _setupDisplayPageText];
     [self.pageScrollView setContentOffset:[self _contentOffsetForPageAtIndex:pageIndex]
@@ -227,6 +222,16 @@ static CGFloat const kScrollPagePadding = 10.0f;
   _progressTintColor = tintColor;
 }
 
+- (void)setTotalPages:(NSUInteger)totalPages
+{
+  _totalPages = totalPages;
+  [self _setupDisplayPageText];
+  if ([self isViewLoaded]) {
+    [self setInitialPageIndex:_currentPageIndex];
+    [self viewWillLayoutSubviews];
+  }
+}
+
 #pragma mark - UIScrollView Delegate
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
@@ -237,10 +242,134 @@ static CGFloat const kScrollPagePadding = 10.0f;
   CGRect visibleBounds = self.pageScrollView.bounds;
   NSInteger index = (NSInteger) (floorf(CGRectGetMidX(visibleBounds) / CGRectGetWidth(visibleBounds)));
   index = MAX(index, 0);
-  index = MIN(index, self.photos.count - 1);
+  index = MIN(index, self.totalPages - 1);
 
   _currentPageIndex = index;
   [self _setupDisplayPageText];
+}
+
+#pragma mark - Display
+
+- (void)reloadCurrentPhotoPage
+{
+  YAPhotoZoomingScrollView *scrollView = [self _displayedPageAtIndex:_currentPageIndex];
+  [scrollView prepareForReuse];
+  [self _layoutPage:scrollView atIndex:_currentPageIndex];
+}
+
+- (void)_displayPages
+{
+  CGRect visibleBounds = self.pageScrollView.bounds;
+
+  NSInteger iFirstIndex = floorf((CGRectGetMinX(visibleBounds) + kScrollPagePadding * 2) / CGRectGetWidth(visibleBounds));
+	NSInteger iLastIndex = floorf((CGRectGetMaxX(visibleBounds) - kScrollPagePadding * 2 - 1) / CGRectGetWidth(visibleBounds));
+
+  iFirstIndex = MAX(iFirstIndex, 0);
+  iFirstIndex = MIN(iFirstIndex, self.totalPages - 1);
+
+  iLastIndex = MAX(iLastIndex, 0);
+  iLastIndex = MIN(iLastIndex, self.totalPages - 1);
+
+  // Recycle no longer needed pages
+  NSInteger pageIndex;
+  for (YAPhotoZoomingScrollView *page in self.visiblePagesSet) {
+    pageIndex = page.tag;
+    if (pageIndex < (NSUInteger)iFirstIndex || pageIndex > (NSUInteger)iLastIndex) {
+      [self.recycledPagesSet addObject:page];
+      [page prepareForReuse];
+      [page removeFromSuperview];
+    }
+  }
+  [self.visiblePagesSet minusSet:self.recycledPagesSet];
+  while (self.recycledPagesSet.count > 2) { // Only keep 2 recycled pages
+    [self.recycledPagesSet removeObject:[self.recycledPagesSet anyObject]];
+  }
+
+  // Add missing pages
+  for (NSUInteger index = (NSUInteger)iFirstIndex; index <= (NSUInteger)iLastIndex; index++) {
+    if (![self isDisplayingPageForIndex:index]) {
+
+      if ([self.delegate respondsToSelector:@selector(photoBrowser:willDisplayPhotoAtPageIndex:)]) {
+        [self.delegate photoBrowser:self willDisplayPhotoAtPageIndex:index];
+      }
+
+      // Add new page
+      YAPhotoZoomingScrollView *page = [[YAPhotoZoomingScrollView alloc] init];
+      if (_progressTintColor) [page.progressView setTintColor:_progressTintColor];
+      page.photoZoomingDelegate = self;
+      page.backgroundColor = [UIColor clearColor];
+      page.opaque = YES;
+
+      [self _layoutPage:page atIndex:index];
+      [self.visiblePagesSet addObject:page];
+      [self.pageScrollView addSubview:page];
+    }
+  }
+}
+
+- (void)_layoutPage:(YAPhotoZoomingScrollView *)page atIndex:(NSUInteger)index
+{
+  page.frame = [self _frameForPageAtIndex:index];
+  page.tag = index;
+
+  id photo = [self _photoAtIndex:index];
+  if (photo
+      && [photo isKindOfClass:[NSURL class]]) {
+    page.photoURL = photo;
+  } else {
+    page.photoImage = photo;
+  }
+}
+
+#pragma mark - setup
+
+- (void)_setupDisplayPageText
+{
+  [self.pagesLabel setText:[NSString stringWithFormat:@"%d / %d", _currentPageIndex + 1, self.totalPages]];
+}
+
+#pragma mark - opinion
+
+- (BOOL)isDisplayingPageForIndex:(NSUInteger)index
+{
+  for (YAPhotoZoomingScrollView *page in self.visiblePagesSet) {
+    if (page.tag == index) return YES;
+  }
+  return NO;
+}
+
+#pragma mark - Size
+
+- (CGRect)_frameForPageScrollView
+{
+  CGRect frame = self.view.bounds;
+  frame.origin.x -= kScrollPagePadding;
+  frame.size.width += (2 * kScrollPagePadding);
+  return frame;
+}
+
+- (CGSize)_contentSizeForPageScrollView
+{
+  CGRect pageScrollViewFrame = [self _frameForPageScrollView];
+  CGSize scrollContentSize = CGSizeMake(pageScrollViewFrame.size.width * self.totalPages,
+                                        pageScrollViewFrame.size.height);
+  return scrollContentSize;
+}
+
+- (CGPoint)_contentOffsetForPageAtIndex:(NSUInteger)index
+{
+  CGFloat pageWidth = self.pageScrollView.bounds.size.width;
+  CGFloat newOffset = index * pageWidth;
+  return CGPointMake(newOffset, 0);
+}
+
+- (CGRect)_frameForPageAtIndex:(NSUInteger)index
+{
+  CGRect bounds = self.pageScrollView.bounds;
+  CGRect pageFrame = bounds;
+  pageFrame.size.width -= (2 * kScrollPagePadding);
+  pageFrame.origin.x = (bounds.size.width * index) + kScrollPagePadding;
+  return pageFrame;
 }
 
 #pragma mark YAPhotoZoomingScrollView Delegate
@@ -274,119 +403,6 @@ static CGFloat const kScrollPagePadding = 10.0f;
   if ([self.delegate respondsToSelector:@selector(photoBrowser:willDownloadImage:downloadURL:)]) {
     [self.delegate photoBrowser:self willDownloadImage:webImageManager downloadURL:URL];
   }
-}
-
-#pragma mark - Display
-
-- (void)_displayPages
-{
-  CGRect visibleBounds = self.pageScrollView.bounds;
-
-  NSInteger iFirstIndex = floorf((CGRectGetMinX(visibleBounds) + kScrollPagePadding * 2) / CGRectGetWidth(visibleBounds));
-	NSInteger iLastIndex = floorf((CGRectGetMaxX(visibleBounds) - kScrollPagePadding * 2 - 1) / CGRectGetWidth(visibleBounds));
-
-  iFirstIndex = MAX(iFirstIndex, 0);
-  iFirstIndex = MIN(iFirstIndex, self.photos.count - 1);
-
-  iLastIndex = MAX(iLastIndex, 0);
-  iLastIndex = MIN(iLastIndex, self.photos.count - 1);
-
-  // Recycle no longer needed pages
-  NSInteger pageIndex;
-  for (YAPhotoZoomingScrollView *page in self.visiblePagesSet) {
-    pageIndex = page.tag;
-    if (pageIndex < (NSUInteger)iFirstIndex || pageIndex > (NSUInteger)iLastIndex) {
-      [self.recycledPagesSet addObject:page];
-      [page prepareForReuse];
-      [page removeFromSuperview];
-    }
-  }
-  [self.visiblePagesSet minusSet:self.recycledPagesSet];
-  while (self.recycledPagesSet.count > 2) { // Only keep 2 recycled pages
-    [self.recycledPagesSet removeObject:[self.recycledPagesSet anyObject]];
-  }
-
-  // Add missing pages
-  for (NSUInteger index = (NSUInteger)iFirstIndex; index <= (NSUInteger)iLastIndex; index++) {
-    if (![self isDisplayingPageForIndex:index]) {
-      // Add new page
-      YAPhotoZoomingScrollView *page = [[YAPhotoZoomingScrollView alloc] init];
-      if (_progressTintColor) [page.progressView setTintColor:_progressTintColor];
-      page.photoZoomingDelegate = self;
-      page.backgroundColor = [UIColor clearColor];
-      page.opaque = YES;
-
-      [self _layoutPage:page atIndex:index];
-      [self.visiblePagesSet addObject:page];
-      [self.pageScrollView addSubview:page];
-    }
-  }
-}
-
-#pragma mark - layout
-
-- (void)_layoutPage:(YAPhotoZoomingScrollView *)page atIndex:(NSUInteger)index
-{
-  page.frame = [self _frameForPageAtIndex:index];
-  page.tag = index;
-
-  id photo = [self _photoAtIndex:index];
-  if ([photo isKindOfClass:[NSURL class]]) {
-    page.photoURL = photo;
-  } else {
-    page.photoImage = photo;
-  }
-}
-
-#pragma mark - setup
-
-- (void)_setupDisplayPageText
-{
-  [self.pagesLabel setText:[NSString stringWithFormat:@"%d / %d", _currentPageIndex + 1, self.photos.count]];
-}
-
-#pragma mark - opinion
-
-- (BOOL)isDisplayingPageForIndex:(NSUInteger)index
-{
-  for (YAPhotoZoomingScrollView *page in self.visiblePagesSet) {
-    if (page.tag == index) return YES;
-  }
-  return NO;
-}
-
-#pragma mark - Size
-
-- (CGRect)_frameForPageScrollView
-{
-  CGRect frame = self.view.bounds;
-  frame.origin.x -= kScrollPagePadding;
-  frame.size.width += (2 * kScrollPagePadding);
-  return frame;
-}
-
-- (CGSize)_contentSizeForPageScrollView
-{
-  CGRect pageScrollViewFrame = [self _frameForPageScrollView];
-  CGSize scrollContentSize = CGSizeMake(pageScrollViewFrame.size.width * self.photos.count,
-                                        pageScrollViewFrame.size.height);
-  return scrollContentSize;
-}
-
-- (CGPoint)_contentOffsetForPageAtIndex:(NSUInteger)index
-{
-  CGFloat pageWidth = self.pageScrollView.bounds.size.width;
-  CGFloat newOffset = index * pageWidth;
-  return CGPointMake(newOffset, 0);
-}
-
-- (CGRect)_frameForPageAtIndex:(NSUInteger)index
-{
-  CGRect bounds = self.pageScrollView.bounds;
-  CGRect pageFrame = bounds;
-  pageFrame.size.width -= (2 * kScrollPagePadding);
-  pageFrame.origin.x = (bounds.size.width * index) + kScrollPagePadding;
-  return pageFrame;
 }
 
 @end
