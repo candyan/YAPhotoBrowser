@@ -27,6 +27,7 @@
 @interface YAPhotoBrowser : UIViewController
 
 @property (nonatomic, assign) NSUInteger totalPages;
+@property (nonatomic, strong, readonly) NSMutableArray *photos;
 
 @property (nonatomic, weak) id<YAPhotoBrowserDelegate> delegate;
 

@@ -13,7 +13,7 @@
 
 @interface YAPhotoBrowser ()<UIScrollViewDelegate, YAPhotoZoomingScrollViewDelegate>
 
-@property (nonatomic, strong) NSArray *photos;
+@property (nonatomic, strong, readwrite) NSMutableArray *photos;
 @property (nonatomic, strong) NSMutableSet *visiblePagesSet, *recycledPagesSet;
 
 @property (nonatomic, strong) UIPanGestureRecognizer *panGesture;
@@ -59,7 +59,7 @@
 
   self = [self initWithNibName:nil bundle:nil];
   if (self) {
-    _photos = photoArray;
+    _photos = [NSMutableArray arrayWithArray:photoArray];
   }
   return self;
 }
@@ -69,7 +69,7 @@
   if (!photoURLArray || photoURLArray.count == 0) return nil;
   self = [self initWithNibName:nil bundle:nil];
   if (self) {
-    _photos = photoURLArray;
+    _photos = [NSMutableArray arrayWithArray:photoURLArray];
   }
   return self;
 }
@@ -225,8 +225,8 @@ static CGFloat const kScrollPagePadding = 10.0f;
 - (void)setTotalPages:(NSUInteger)totalPages
 {
   _totalPages = totalPages;
-  [self _setupDisplayPageText];
   if ([self isViewLoaded]) {
+    [self _setupDisplayPageText];
     [self setInitialPageIndex:_currentPageIndex];
     [self viewWillLayoutSubviews];
   }
