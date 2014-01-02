@@ -21,6 +21,8 @@
 @property (nonatomic, weak) UIScrollView *pageScrollView;
 @property (nonatomic, weak) UILabel *pagesLabel;
 
+@property (nonatomic, assign) NSUInteger currentPageIndex;
+
 @end
 
 @implementation YAPhotoBrowser {
@@ -70,7 +72,10 @@
 {
   [super viewDidLoad];
 	// Do any additional setup after loading the view.
-  [self _setupPagesTip];
+  if (_showPagesTip) {
+    [self _setupPagesTip];
+  }
+
   self.pageScrollView.contentOffset = [self _contentOffsetForPageAtIndex:_initialPageIndex];
 }
 
@@ -228,13 +233,16 @@ static CGFloat const kScrollPagePadding = 10.0f;
 {
   _showPagesTip = showPagesTip;
 
-  NSTimeInterval duration = flag ? .2f : 0.0f;
-  [self.pagesLabel setAlpha:showPagesTip ? 0.0f : 1.0f];
-  [UIView animateWithDuration:duration animations:^{
-    [self.pagesLabel setAlpha:showPagesTip ? 1.0f : 0.0f];
-  } completion:^(BOOL finished) {
-    [self.pagesLabel setHidden:!showPagesTip];
-  }];
+  if ([self isViewLoaded]) {
+    NSTimeInterval duration = flag ? .2f : 0.0f;
+    [self.pagesLabel setAlpha:showPagesTip ? 0.0f : 1.0f];
+    [UIView animateWithDuration:duration animations:^{
+      [self.pagesLabel setAlpha:showPagesTip ? 1.0f : 0.0f];
+    } completion:^(BOOL finished) {
+      [self.pagesLabel setHidden:!showPagesTip];
+      if (showPagesTip) [self _setupPagesTip];
+    }];
+  }
 }
 
 - (void)setShowPagesTip:(BOOL)showPagesTip

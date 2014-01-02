@@ -26,7 +26,6 @@
 
 @interface YAPhotoBrowser : UIViewController
 
-@property (nonatomic, assign) NSUInteger currentPageIndex;
 @property (nonatomic, assign) NSUInteger initialPageIndex;
 @property (nonatomic, assign) NSUInteger totalPages;
 
