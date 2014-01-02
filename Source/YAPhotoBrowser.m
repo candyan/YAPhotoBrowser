@@ -47,8 +47,6 @@
 
     _initialPageIndex = 0;
     _currentPageIndex = 0;
-
-    _totalPages = _photos.count;
   }
   return self;
 }
@@ -60,18 +58,14 @@
   self = [self initWithNibName:nil bundle:nil];
   if (self) {
     _photos = [NSMutableArray arrayWithArray:photoArray];
+    _totalPages = _photos.count;
   }
   return self;
 }
 
 - (instancetype)initWithPhotoURLArray:(NSArray *)photoURLArray
 {
-  if (!photoURLArray || photoURLArray.count == 0) return nil;
-  self = [self initWithNibName:nil bundle:nil];
-  if (self) {
-    _photos = [NSMutableArray arrayWithArray:photoURLArray];
-  }
-  return self;
+  return [self initWithPhotoArray:photoURLArray];
 }
 
 #pragma mark - view lifeCycle
