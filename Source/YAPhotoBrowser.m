@@ -24,12 +24,7 @@
 @end
 
 @implementation YAPhotoBrowser {
-  NSUInteger _currentPageIndex;
-  NSUInteger _initialPageIndex;
-
   UIStatusBarStyle _originalStatusBarStyle;
-
-  UIColor *_progressTintColor;
 }
 
 #pragma mark - init
@@ -47,6 +42,7 @@
 
     _initialPageIndex = 0;
     _currentPageIndex = 0;
+    _showPagesTip = YES;
   }
   return self;
 }
@@ -74,7 +70,7 @@
 {
   [super viewDidLoad];
 	// Do any additional setup after loading the view.
-  [self _setupDisplayPageText];
+  [self _setupPagesTip];
   self.pageScrollView.contentOffset = [self _contentOffsetForPageAtIndex:_initialPageIndex];
 }
 
@@ -205,25 +201,45 @@ static CGFloat const kScrollPagePadding = 10.0f;
 
   if (self.totalPages > 1
       && [self isViewLoaded]) {
-    [self _setupDisplayPageText];
+    [self _setupPagesTip];
     [self.pageScrollView setContentOffset:[self _contentOffsetForPageAtIndex:pageIndex]
                                  animated:YES];
   }
-}
-
-- (void)setProgressTintColor:(UIColor *)tintColor
-{
-  _progressTintColor = tintColor;
 }
 
 - (void)setTotalPages:(NSUInteger)totalPages
 {
   _totalPages = totalPages;
   if ([self isViewLoaded]) {
-    [self _setupDisplayPageText];
-    [self setInitialPageIndex:_currentPageIndex];
+    [self _setupPagesTip];
+    [self setInitialPageIndex:self.currentPageIndex];
     [self viewWillLayoutSubviews];
   }
+}
+
+- (void)setCurrentPageIndex:(NSUInteger)currentPageIndex
+{
+  _currentPageIndex = currentPageIndex;
+  [self _setupPagesTip];
+  [self.pageScrollView setContentOffset:[self _contentOffsetForPageAtIndex:currentPageIndex]];
+}
+
+- (void)setShowPagesTip:(BOOL)showPagesTip animated:(BOOL)flag
+{
+  _showPagesTip = showPagesTip;
+
+  NSTimeInterval duration = flag ? .2f : 0.0f;
+  [self.pagesLabel setAlpha:showPagesTip ? 0.0f : 1.0f];
+  [UIView animateWithDuration:duration animations:^{
+    [self.pagesLabel setAlpha:showPagesTip ? 1.0f : 0.0f];
+  } completion:^(BOOL finished) {
+    [self.pagesLabel setHidden:!showPagesTip];
+  }];
+}
+
+- (void)setShowPagesTip:(BOOL)showPagesTip
+{
+  [self setShowPagesTip:showPagesTip animated:NO];
 }
 
 #pragma mark - UIScrollView Delegate
@@ -239,16 +255,16 @@ static CGFloat const kScrollPagePadding = 10.0f;
   index = MIN(index, self.totalPages - 1);
 
   _currentPageIndex = index;
-  [self _setupDisplayPageText];
+  [self _setupPagesTip];
 }
 
 #pragma mark - Display
 
 - (void)reloadCurrentPhotoPage
 {
-  YAPhotoZoomingScrollView *scrollView = [self _displayedPageAtIndex:_currentPageIndex];
+  YAPhotoZoomingScrollView *scrollView = [self _displayedPageAtIndex:self.currentPageIndex];
   [scrollView prepareForReuse];
-  [self _layoutPage:scrollView atIndex:_currentPageIndex];
+  [self _layoutPage:scrollView atIndex:self.currentPageIndex];
 }
 
 - (void)_displayPages
@@ -317,9 +333,9 @@ static CGFloat const kScrollPagePadding = 10.0f;
 
 #pragma mark - setup
 
-- (void)_setupDisplayPageText
+- (void)_setupPagesTip
 {
-  [self.pagesLabel setText:[NSString stringWithFormat:@"%d / %d", _currentPageIndex + 1, self.totalPages]];
+  [self.pagesLabel setText:[NSString stringWithFormat:@"%d / %d", self.currentPageIndex + 1, self.totalPages]];
 }
 
 #pragma mark - opinion
@@ -372,12 +388,12 @@ static CGFloat const kScrollPagePadding = 10.0f;
              singleTapDetected:(UITapGestureRecognizer *)tapGR
 {
   if ([self.delegate respondsToSelector:@selector(photoBrowser:willDismissAtPageIndex:)]) {
-    [self.delegate photoBrowser:self willDismissAtPageIndex:_currentPageIndex];
+    [self.delegate photoBrowser:self willDismissAtPageIndex:self.currentPageIndex];
   }
   [self dismissViewControllerAnimated:YES
                            completion:^{
                              if ([self.delegate respondsToSelector:@selector(photoBrowser:didDismissAtPageIndex:)]) {
-                               [self.delegate photoBrowser:self didDismissAtPageIndex:_currentPageIndex];
+                               [self.delegate photoBrowser:self didDismissAtPageIndex:self.currentPageIndex];
                              }
                            }];
 }
@@ -386,7 +402,7 @@ static CGFloat const kScrollPagePadding = 10.0f;
              longPressDetected:(UILongPressGestureRecognizer *)longPressGR
 {
   if ([self.delegate respondsToSelector:@selector(photoBrowser:longPressActionAtIndex:)]) {
-    [self.delegate photoBrowser:self longPressActionAtIndex:_currentPageIndex];
+    [self.delegate photoBrowser:self longPressActionAtIndex:self.currentPageIndex];
   }
 }
 

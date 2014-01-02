@@ -26,7 +26,14 @@
 
 @interface YAPhotoBrowser : UIViewController
 
+@property (nonatomic, assign) NSUInteger currentPageIndex;
+@property (nonatomic, assign) NSUInteger initialPageIndex;
 @property (nonatomic, assign) NSUInteger totalPages;
+
+@property (nonatomic, assign) BOOL showPagesTip;
+
+@property (nonatomic, strong) UIColor *progressTintColor;
+
 @property (nonatomic, strong, readonly) NSMutableArray *photos;
 
 @property (nonatomic, weak) id<YAPhotoBrowserDelegate> delegate;
@@ -34,8 +41,7 @@
 - (instancetype)initWithPhotoArray:(NSArray *)photoArray;
 - (instancetype)initWithPhotoURLArray:(NSArray *)photoURLArray;
 
-- (void)setInitialPageIndex:(NSUInteger)pageIndex;
-- (void)setProgressTintColor:(UIColor *)tintColor;
+- (void)setShowPagesTip:(BOOL)show animated:(BOOL)flag;
 
 - (UIImage *)photoImageAtIndex:(NSUInteger)index;
 
