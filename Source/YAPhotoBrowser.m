@@ -126,6 +126,8 @@ static CGFloat const kPagesLabelHeight = 26.0f;
     [self.view addSubview:pagesLabel];
 
     _pagesLabel = pagesLabel;
+
+    [_pagesLabel setHidden:!_showPagesTip];
   }
   return _pagesLabel;
 }
