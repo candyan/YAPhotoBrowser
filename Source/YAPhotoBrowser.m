@@ -97,7 +97,7 @@
 
 #pragma mark - action
 
-- (void)_dismissSelf
+- (void)_dismiss
 {
   if (_senderViewForAnimation && _currentPageIndex == _initialPageIndex)
   {
@@ -499,7 +499,7 @@ static CGFloat const kScrollPagePadding = 10.0f;
   if ([self.delegate respondsToSelector:@selector(photoBrowser:willDismissAtPageIndex:)]) {
     [self.delegate photoBrowser:self willDismissAtPageIndex:self.currentPageIndex];
   }
-  [self _dismissSelf];
+  [self _dismiss];
 }
 
 - (void)photoZoomingScrollView:(YAPhotoZoomingScrollView *)scrollView
