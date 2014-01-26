@@ -44,4 +44,16 @@
                      animated:YES
                    completion:nil];
 }
+
+- (IBAction)handlePresentWithViewButtonTapAction:(id)sender
+{
+  NSArray *photoArray = @[[NSURL URLWithString:@"http://img3.douban.com/view/status/raw/public/b3f5110ae68a375.jpg"],
+                          [NSURL URLWithString:@"http://img3.douban.com/view/commodity_review/large/public/p26913.jpg"],
+                          [NSURL URLWithString:@"http://img3.douban.com/view/commodity_review/large/public/p26915.jpg"]];
+  YAPhotoBrowser *photoBrowser = [[YAPhotoBrowser alloc] initWithPhotoArray:photoArray animatedFromView:self.view];
+  [self presentViewController:photoBrowser
+                     animated:YES
+                   completion:nil];
+}
+
 @end

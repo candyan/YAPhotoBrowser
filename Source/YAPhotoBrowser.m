@@ -12,6 +12,15 @@
 #import "SDImageCache.h"
 
 @interface YAPhotoBrowser ()<UIScrollViewDelegate, YAPhotoZoomingScrollViewDelegate>
+{
+  UIView *_senderViewForAnimation;
+  CGFloat _animationDuration;
+  CGRect _resizableImageViewFrame;
+  BOOL _autoHide;
+  UIImage *_scaleImage;
+  BOOL _useWhiteBackgroundColor;
+  CGFloat _backgroundScaleFactor;
+}
 
 @property (nonatomic, strong, readwrite) NSMutableArray *photos;
 @property (nonatomic, strong) NSMutableSet *visiblePagesSet, *recycledPagesSet;
@@ -35,8 +44,6 @@
 {
   self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
   if (self) {
-    // Custom initialization
-
     if ([self respondsToSelector:@selector(setAutomaticallyAdjustsScrollViewInsets:)]) {
       [self setAutomaticallyAdjustsScrollViewInsets:NO];
     }
@@ -45,6 +52,12 @@
     _initialPageIndex = 0;
     _currentPageIndex = 0;
     _showPagesTip = YES;
+    _animationDuration = 0.28;
+    _autoHide = YES;
+    _senderViewForAnimation = nil;
+    _scaleImage = nil;
+    _useWhiteBackgroundColor = NO;
+    _backgroundScaleFactor = 1.0;
   }
   return self;
 }
@@ -61,9 +74,105 @@
   return self;
 }
 
+- (instancetype)initWithPhotoArray:(NSArray *)photoArray animatedFromView:(UIView *)view
+{
+  id currentSelf = [self initWithPhotoArray:photoArray];
+  _senderViewForAnimation = view;
+  
+  return currentSelf;
+}
+
 - (instancetype)initWithPhotoURLArray:(NSArray *)photoURLArray
 {
   return [self initWithPhotoArray:photoURLArray];
+}
+
+- (instancetype)initWithPhotoURLArray:(NSArray *)photoURLArray animatedFromView:(UIView *)view
+{
+  id currentSelf = [self initWithPhotoURLArray:photoURLArray];
+  _senderViewForAnimation = view;
+  
+  return currentSelf;
+}
+
+#pragma mark - action
+
+- (void)_dismissSelf
+{
+  if (_senderViewForAnimation && _currentPageIndex == _initialPageIndex)
+  {
+    YAPhotoZoomingScrollView *scrollView = [self _displayedPageAtIndex:_currentPageIndex];
+    [self _performCloseAnimationWithScrollView:scrollView];
+  }
+  else
+  {
+    _senderViewForAnimation.hidden = NO;
+    [self _prepareForClosePhotoBrowser];
+    [self _dismissPhotoBrowserAnimated:YES];
+  }
+}
+
+- (void)_prepareForClosePhotoBrowser
+{
+  [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationFade];
+  [[[[UIApplication sharedApplication] delegate] window] removeGestureRecognizer:_panGesture];
+  _autoHide = NO;
+  [NSObject cancelPreviousPerformRequestsWithTarget:self]; // Cancel any pending toggles from taps
+}
+
+- (void)_performCloseAnimationWithScrollView:(YAPhotoZoomingScrollView *)scrollView
+{
+  float fadeAlpha = 1 - abs(scrollView.frame.origin.y)/scrollView.frame.size.height;
+  UIImage *imageFromView = scrollView.photoImage;
+  CGRect screenBound = [[UIScreen mainScreen] bounds];
+  CGFloat screenWidth = screenBound.size.width;
+  CGFloat screenHeight = screenBound.size.height;
+  float scaleFactor = imageFromView.size.width / screenWidth;
+  UIView *fadeView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, screenWidth, screenHeight)];
+  fadeView.backgroundColor = [UIColor blackColor];
+  fadeView.alpha = fadeAlpha;
+  [[[UIApplication sharedApplication].delegate window] addSubview:fadeView];
+  UIImageView *resizableImageView = [[UIImageView alloc] initWithImage:imageFromView];
+  resizableImageView.frame = (imageFromView) ? CGRectMake(0, (screenHeight/2)-((imageFromView.size.height / scaleFactor)/2)+scrollView.frame.origin.y, screenWidth, imageFromView.size.height / scaleFactor) : CGRectZero;
+  resizableImageView.contentMode = UIViewContentModeScaleAspectFill;
+  resizableImageView.backgroundColor = [UIColor clearColor];
+  resizableImageView.clipsToBounds = YES;
+  [[[UIApplication sharedApplication].delegate window] addSubview:resizableImageView];
+  self.view.hidden = YES;
+  
+  [UIView animateWithDuration:_animationDuration animations:^{
+    [[[[UIApplication sharedApplication].delegate window] rootViewController].view setTransform:CGAffineTransformIdentity];
+    resizableImageView.layer.frame = _resizableImageViewFrame;
+    fadeView.alpha = 0;
+    self.view.backgroundColor = [UIColor clearColor];
+  } completion:^(BOOL finished) {
+    _senderViewForAnimation.hidden = NO;
+    _senderViewForAnimation = nil;
+    _scaleImage = nil;
+    [fadeView removeFromSuperview];
+    [resizableImageView removeFromSuperview];
+    [self _prepareForClosePhotoBrowser];
+    [self _dismissPhotoBrowserAnimated:YES];
+  }];
+}
+
+- (void)_dismissPhotoBrowserAnimated:(BOOL)animated
+{
+  [self dismissViewControllerAnimated:animated completion:^{
+    if ([_delegate respondsToSelector:@selector(photoBrowser:didDismissAtPageIndex:)])
+      [_delegate photoBrowser:self didDismissAtPageIndex:_currentPageIndex];
+    UIViewController *rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+    rootViewController.modalPresentationStyle = 0;
+  }];
+}
+
+- (UIImage*)getImageFromView:(UIView *)view
+{
+  UIGraphicsBeginImageContextWithOptions(view.bounds.size, YES, 2);
+  [view.layer renderInContext:UIGraphicsGetCurrentContext()];
+  UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
+  return image;
 }
 
 #pragma mark - view lifeCycle
@@ -71,7 +180,6 @@
 - (void)viewDidLoad
 {
   [super viewDidLoad];
-	// Do any additional setup after loading the view.
   if (_showPagesTip) {
     [self _setupPagesTip];
   }
@@ -307,7 +415,7 @@ static CGFloat const kScrollPagePadding = 10.0f;
 
   // Add missing pages
   for (NSUInteger index = (NSUInteger)iFirstIndex; index <= (NSUInteger)iLastIndex; index++) {
-    if (![self isDisplayingPageForIndex:index]) {
+    if (![self _isDisplayingPageForIndex:index]) {
 
       if ([self.delegate respondsToSelector:@selector(photoBrowser:willDisplayPhotoAtPageIndex:)]) {
         [self.delegate photoBrowser:self willDisplayPhotoAtPageIndex:index];
@@ -350,7 +458,7 @@ static CGFloat const kScrollPagePadding = 10.0f;
 
 #pragma mark - opinion
 
-- (BOOL)isDisplayingPageForIndex:(NSUInteger)index
+- (BOOL)_isDisplayingPageForIndex:(NSUInteger)index
 {
   for (YAPhotoZoomingScrollView *page in self.visiblePagesSet) {
     if (page.tag == index) return YES;
@@ -400,12 +508,7 @@ static CGFloat const kScrollPagePadding = 10.0f;
   if ([self.delegate respondsToSelector:@selector(photoBrowser:willDismissAtPageIndex:)]) {
     [self.delegate photoBrowser:self willDismissAtPageIndex:self.currentPageIndex];
   }
-  [self dismissViewControllerAnimated:YES
-                           completion:^{
-                             if ([self.delegate respondsToSelector:@selector(photoBrowser:didDismissAtPageIndex:)]) {
-                               [self.delegate photoBrowser:self didDismissAtPageIndex:self.currentPageIndex];
-                             }
-                           }];
+  [self _dismissSelf];
 }
 
 - (void)photoZoomingScrollView:(YAPhotoZoomingScrollView *)scrollView

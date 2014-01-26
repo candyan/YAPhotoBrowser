@@ -38,7 +38,9 @@
 @property (nonatomic, weak) id<YAPhotoBrowserDelegate> delegate;
 
 - (instancetype)initWithPhotoArray:(NSArray *)photoArray;
+- (instancetype)initWithPhotoArray:(NSArray *)photoArray animatedFromView:(UIView*)view;
 - (instancetype)initWithPhotoURLArray:(NSArray *)photoURLArray;
+- (instancetype)initWithPhotoURLArray:(NSArray *)photoURLArray animatedFromView:(UIView*)view;
 
 - (void)setShowPagesTip:(BOOL)show animated:(BOOL)flag;
 
