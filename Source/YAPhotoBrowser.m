@@ -166,15 +166,6 @@
   }];
 }
 
-- (UIImage*)getImageFromView:(UIView *)view
-{
-  UIGraphicsBeginImageContextWithOptions(view.bounds.size, YES, 2);
-  [view.layer renderInContext:UIGraphicsGetCurrentContext()];
-  UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-  UIGraphicsEndImageContext();
-  return image;
-}
-
 #pragma mark - view lifeCycle
 
 - (void)viewDidLoad
