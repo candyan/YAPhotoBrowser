@@ -9,8 +9,12 @@
 #import "ViewController.h"
 #import "YAPhotoBrowser.h"
 #import "SDImageCache.h"
+#import "UIImageView+WebCache.h"
 
 @interface ViewController ()
+{
+  UIImageView *_imageView;
+}
 
 @end
 
@@ -18,9 +22,15 @@
 
 - (void)viewDidLoad
 {
-    [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
+  [super viewDidLoad];
+  
   [[SDImageCache sharedImageCache] clearDisk];
+  
+  _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 50, 150, 150)];
+  _imageView.backgroundColor = [UIColor redColor];
+  [_imageView setImageWithURL:[NSURL URLWithString:@"http://img3.douban.com/view/status/raw/public/b3f5110ae68a375.jpg"]];
+  [self.view addSubview:_imageView];
+  
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -50,7 +60,8 @@
   NSArray *photoArray = @[[NSURL URLWithString:@"http://img3.douban.com/view/status/raw/public/b3f5110ae68a375.jpg"],
                           [NSURL URLWithString:@"http://img3.douban.com/view/commodity_review/large/public/p26913.jpg"],
                           [NSURL URLWithString:@"http://img3.douban.com/view/commodity_review/large/public/p26915.jpg"]];
-  YAPhotoBrowser *photoBrowser = [[YAPhotoBrowser alloc] initWithPhotoArray:photoArray animatedFromView:self.view];
+  YAPhotoBrowser *photoBrowser = [[YAPhotoBrowser alloc] initWithPhotoArray:photoArray
+                                                           animatedFromView:_imageView];
   [self presentViewController:photoBrowser
                      animated:YES
                    completion:nil];

@@ -120,6 +120,45 @@
   [NSObject cancelPreviousPerformRequestsWithTarget:self]; // Cancel any pending toggles from taps
 }
 
+- (void)_performAnimation
+{
+    UIImage *imageFromView = _scaleImage ? _scaleImage : [self _getImageFromView:_senderViewForAnimation];
+    
+    _resizableImageViewFrame = [_senderViewForAnimation.superview convertRect:_senderViewForAnimation.frame toView:nil];
+    
+    CGRect screenBound = [[UIScreen mainScreen] bounds];
+    CGFloat screenWidth = screenBound.size.width;
+    CGFloat screenHeight = screenBound.size.height;
+    
+    UIView *fadeView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, screenWidth, screenHeight)];
+    fadeView.backgroundColor = [UIColor clearColor];
+    [[[UIApplication sharedApplication].delegate window] addSubview:fadeView];
+    
+    UIImageView *resizableImageView = [[UIImageView alloc] initWithImage:imageFromView];
+    resizableImageView.frame = _resizableImageViewFrame;
+    resizableImageView.clipsToBounds = YES;
+    resizableImageView.contentMode = UIViewContentModeScaleAspectFill;
+    resizableImageView.backgroundColor = [UIColor colorWithWhite:(_useWhiteBackgroundColor) ? 1 : 0 alpha:1];
+    [[[UIApplication sharedApplication].delegate window] addSubview:resizableImageView];
+    _senderViewForAnimation.hidden = YES;
+
+    [UIView animateWithDuration:_animationDuration animations:^{
+        CGAffineTransform zoom = CGAffineTransformScale(CGAffineTransformIdentity, _backgroundScaleFactor, _backgroundScaleFactor);
+        fadeView.backgroundColor = [UIColor blackColor];
+        
+        [[[[UIApplication sharedApplication].delegate window] rootViewController].view setTransform:zoom];
+
+        float scaleFactor =  (imageFromView ? imageFromView.size.width : screenWidth) / screenWidth;
+        
+        resizableImageView.frame = CGRectMake(0, (screenHeight/2)-((imageFromView.size.height / scaleFactor)/2), screenWidth, imageFromView.size.height / scaleFactor);
+    } completion:^(BOOL finished) {
+        self.view.alpha = 1;
+        resizableImageView.backgroundColor = [UIColor colorWithWhite:(_useWhiteBackgroundColor) ? 1 : 0 alpha:1];
+        [fadeView removeFromSuperview];
+        [resizableImageView removeFromSuperview];
+    }];
+}
+
 - (void)_performCloseAnimationWithScrollView:(YAPhotoZoomingScrollView *)scrollView
 {
   float fadeAlpha = 1 - abs(scrollView.frame.origin.y)/scrollView.frame.size.height;
@@ -156,6 +195,15 @@
   }];
 }
 
+- (UIImage *)_getImageFromView:(UIView *)view
+{
+    UIGraphicsBeginImageContextWithOptions(view.bounds.size, YES, 2);
+    [view.layer renderInContext:UIGraphicsGetCurrentContext()];
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return image;
+}
+
 - (void)_dismissPhotoBrowserAnimated:(BOOL)animated
 {
   [self dismissViewControllerAnimated:animated completion:^{
@@ -171,6 +219,9 @@
 - (void)viewDidLoad
 {
   [super viewDidLoad];
+  
+  [self _performAnimation];
+  
   if (_showPagesTip) {
     [self _setupPagesTip];
   }
