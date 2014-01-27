@@ -138,7 +138,7 @@
   resizableImageView.frame = _resizableImageViewFrame;
   resizableImageView.clipsToBounds = YES;
   resizableImageView.contentMode = UIViewContentModeScaleAspectFill;
-  resizableImageView.backgroundColor = [UIColor colorWithWhite:(_useWhiteBackgroundColor) ? 1 : 0 alpha:1];
+  resizableImageView.backgroundColor = [UIColor colorWithWhite:((_useWhiteBackgroundColor) ? 1 : 0) alpha:1];
   [[[UIApplication sharedApplication].delegate window] addSubview:resizableImageView];
   _senderViewForAnimation.hidden = YES;
   
@@ -153,7 +153,7 @@
     resizableImageView.frame = CGRectMake(0, (screenHeight/2)-((imageFromView.size.height / scaleFactor)/2), screenWidth, imageFromView.size.height / scaleFactor);
   } completion:^(BOOL finished) {
     self.view.alpha = 1;
-    resizableImageView.backgroundColor = [UIColor colorWithWhite:(_useWhiteBackgroundColor) ? 1 : 0 alpha:1];
+    resizableImageView.backgroundColor = [UIColor colorWithWhite:((_useWhiteBackgroundColor) ? 1 : 0) alpha:1];
     [fadeView removeFromSuperview];
     [resizableImageView removeFromSuperview];
   }];
