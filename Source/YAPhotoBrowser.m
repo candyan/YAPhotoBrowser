@@ -36,6 +36,9 @@
 
 @implementation YAPhotoBrowser {
   UIStatusBarStyle _originalStatusBarStyle;
+
+  UIWindow *_applicationWindow;
+  UIViewController *_applicationRootViewController;
 }
 
 #pragma mark - init
@@ -47,12 +50,17 @@
     if ([self respondsToSelector:@selector(setAutomaticallyAdjustsScrollViewInsets:)]) {
       [self setAutomaticallyAdjustsScrollViewInsets:NO];
     }
+
+    _applicationWindow = [[[UIApplication sharedApplication] delegate] window];
+    _applicationRootViewController = _applicationWindow.rootViewController;
+
+    _applicationRootViewController.modalPresentationStyle = UIModalPresentationCurrentContext;
     self.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
 
     _initialPageIndex = 0;
     _currentPageIndex = 0;
     _showPagesTip = YES;
-    _animationDuration = 0.28;
+    _animationDuration = 0.5;
     _autoHide = YES;
     _senderViewForAnimation = nil;
     _scaleImage = nil;
@@ -115,13 +123,15 @@
 - (void)_prepareForClosePhotoBrowser
 {
   [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationFade];
-  [[[[UIApplication sharedApplication] delegate] window] removeGestureRecognizer:_panGesture];
+  [_applicationWindow removeGestureRecognizer:_panGesture];
   _autoHide = NO;
   [NSObject cancelPreviousPerformRequestsWithTarget:self]; // Cancel any pending toggles from taps
 }
 
 - (void)_performAnimation
 {
+  self.view.alpha = 0.0f;
+
   UIImage *imageFromView = _scaleImage ? _scaleImage : [self _getImageFromView:_senderViewForAnimation];
   
   _resizableImageViewFrame = [_senderViewForAnimation.superview convertRect:_senderViewForAnimation.frame toView:nil];
@@ -132,24 +142,20 @@
   
   UIView *fadeView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, screenWidth, screenHeight)];
   fadeView.backgroundColor = [UIColor clearColor];
-  [[[UIApplication sharedApplication].delegate window] addSubview:fadeView];
+  [_applicationWindow addSubview:fadeView];
   
   UIImageView *resizableImageView = [[UIImageView alloc] initWithImage:imageFromView];
   resizableImageView.frame = _resizableImageViewFrame;
   resizableImageView.clipsToBounds = YES;
   resizableImageView.contentMode = UIViewContentModeScaleAspectFill;
   resizableImageView.backgroundColor = [UIColor colorWithWhite:((_useWhiteBackgroundColor) ? 1 : 0) alpha:1];
-  [[[UIApplication sharedApplication].delegate window] addSubview:resizableImageView];
+  [_applicationWindow addSubview:resizableImageView];
   _senderViewForAnimation.hidden = YES;
   
   [UIView animateWithDuration:_animationDuration animations:^{
-    CGAffineTransform zoom = CGAffineTransformScale(CGAffineTransformIdentity, _backgroundScaleFactor, _backgroundScaleFactor);
-    fadeView.backgroundColor = [UIColor blackColor];
-    
-    [[[[UIApplication sharedApplication].delegate window] rootViewController].view setTransform:zoom];
-    
+    fadeView.backgroundColor = _useWhiteBackgroundColor ? [UIColor whiteColor] : [UIColor blackColor];
+
     float scaleFactor =  (imageFromView ? imageFromView.size.width : screenWidth) / screenWidth;
-    
     resizableImageView.frame = CGRectMake(0, (screenHeight/2)-((imageFromView.size.height / scaleFactor)/2), screenWidth, imageFromView.size.height / scaleFactor);
   } completion:^(BOOL finished) {
     self.view.alpha = 1;
@@ -170,17 +176,17 @@
   UIView *fadeView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, screenWidth, screenHeight)];
   fadeView.backgroundColor = [UIColor blackColor];
   fadeView.alpha = fadeAlpha;
-  [[[UIApplication sharedApplication].delegate window] addSubview:fadeView];
+  [_applicationWindow addSubview:fadeView];
   UIImageView *resizableImageView = [[UIImageView alloc] initWithImage:imageFromView];
   resizableImageView.frame = (imageFromView) ? CGRectMake(0, (screenHeight/2)-((imageFromView.size.height / scaleFactor)/2)+scrollView.frame.origin.y, screenWidth, imageFromView.size.height / scaleFactor) : CGRectZero;
   resizableImageView.contentMode = UIViewContentModeScaleAspectFill;
   resizableImageView.backgroundColor = [UIColor clearColor];
   resizableImageView.clipsToBounds = YES;
-  [[[UIApplication sharedApplication].delegate window] addSubview:resizableImageView];
+  [_applicationWindow addSubview:resizableImageView];
   self.view.hidden = YES;
   
   [UIView animateWithDuration:_animationDuration animations:^{
-    [[[[UIApplication sharedApplication].delegate window] rootViewController].view setTransform:CGAffineTransformIdentity];
+    [_applicationRootViewController.view setTransform:CGAffineTransformIdentity];
     resizableImageView.layer.frame = _resizableImageViewFrame;
     fadeView.alpha = 0;
     self.view.backgroundColor = [UIColor clearColor];
@@ -209,8 +215,7 @@
   [self dismissViewControllerAnimated:animated completion:^{
     if ([_delegate respondsToSelector:@selector(photoBrowser:didDismissAtPageIndex:)])
       [_delegate photoBrowser:self didDismissAtPageIndex:_currentPageIndex];
-    UIViewController *rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
-    rootViewController.modalPresentationStyle = 0;
+    _applicationRootViewController.modalPresentationStyle = 0;
   }];
 }
 

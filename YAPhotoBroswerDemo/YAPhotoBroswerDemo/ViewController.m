@@ -63,7 +63,7 @@
   YAPhotoBrowser *photoBrowser = [[YAPhotoBrowser alloc] initWithPhotoArray:photoArray
                                                            animatedFromView:_imageView];
   [self presentViewController:photoBrowser
-                     animated:YES
+                     animated:NO
                    completion:nil];
 }
 
