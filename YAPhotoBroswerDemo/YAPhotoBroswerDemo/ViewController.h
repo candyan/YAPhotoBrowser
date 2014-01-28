@@ -10,10 +10,4 @@
 
 @interface ViewController : UIViewController
 
-
-@property (weak, nonatomic) IBOutlet UIButton *presentButton;
-
-- (IBAction)handlePresentButtonTapAction:(id)sender;
-- (IBAction)handlePresentWithViewButtonTapAction:(id)sender;
-
 @end
