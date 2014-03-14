@@ -146,7 +146,7 @@ static CGFloat const kProgressViewSize = 50.0f;
     __weak typeof(self) weakSelf = self;
     [self.webImageManager downloadWithURL:photoURL
                                   options:SDWebImageProgressiveDownload | SDWebImageRetryFailed
-                                 progress:^(NSUInteger receivedSize, long long expectedSize)
+                                 progress:^(NSInteger receivedSize, NSInteger expectedSize)
      {
        if (expectedSize > 0) {
          CGFloat progress = ((CGFloat)receivedSize / (CGFloat)expectedSize);
