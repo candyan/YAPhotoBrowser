@@ -330,7 +330,7 @@ static CGFloat const kScrollPagePadding = 10.0f;
   return index < self.photos.count ? self.photos[index] : nil;
 }
 
-- (NSArray *)photos
+- (NSArray *)allPhotos
 {
   return [NSArray arrayWithArray:self.photos];
 }

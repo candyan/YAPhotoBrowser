@@ -45,7 +45,7 @@
 - (void)setShowPagesTip:(BOOL)show animated:(BOOL)flag;
 
 - (UIImage *)photoImageAtIndex:(NSUInteger)index;
-- (NSArray *)photos;
+- (NSArray *)allPhotos;
 
 - (void)reloadCurrentPhotoPage;
 
