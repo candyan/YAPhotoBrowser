@@ -28,7 +28,6 @@
 @property (nonatomic, strong) UIPanGestureRecognizer *panGesture;
 
 @property (nonatomic, weak) UIScrollView *pageScrollView;
-@property (nonatomic, weak) UILabel *pagesLabel;
 
 @property (nonatomic, assign) NSUInteger currentPageIndex;
 
@@ -40,6 +39,8 @@
   UIWindow *_applicationWindow;
   UIViewController *_applicationRootViewController;
 }
+
+@synthesize pagesLabel = _pagesLabel;
 
 #pragma mark - init
 
@@ -327,6 +328,11 @@ static CGFloat const kScrollPagePadding = 10.0f;
 - (id)_photoAtIndex:(NSUInteger)index
 {
   return index < self.photos.count ? self.photos[index] : nil;
+}
+
+- (NSArray *)photos
+{
+  return [NSArray arrayWithArray:self.photos];
 }
 
 - (YAPhotoZoomingScrollView *)_displayedPageAtIndex:(NSUInteger)index

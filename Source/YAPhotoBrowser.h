@@ -33,7 +33,7 @@
 
 @property (nonatomic, strong) UIColor *progressTintColor;
 
-@property (nonatomic, strong, readonly) NSMutableArray *photos;
+@property (nonatomic, weak, readonly) UILabel *pagesLabel;
 
 @property (nonatomic, weak) id<YAPhotoBrowserDelegate> delegate;
 
@@ -45,6 +45,7 @@
 - (void)setShowPagesTip:(BOOL)show animated:(BOOL)flag;
 
 - (UIImage *)photoImageAtIndex:(NSUInteger)index;
+- (NSArray *)photos;
 
 - (void)reloadCurrentPhotoPage;
 
