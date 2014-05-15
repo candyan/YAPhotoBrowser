@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name          =  "YAPhotoBrowser"
   s.summary       =  "Photo Browser / Image progress and more"
-  s.version       =  "0.6.1"
+  s.version       =  "0.7.0"
   s.homepage      =  "https://github.com/candyan/YAPhotoBrowser.git"
   s.license       =  { :type => 'MIT', :file => 'LICENSE' }
   s.author        =  { "Candyan" => "liuyanhp@gmail.com" }
@@ -10,5 +10,4 @@ Pod::Spec.new do |s|
   s.source_files  =  'Source/*.{h,m}'
   s.requires_arc  =  true
   s.dependency       'SDWebImage', '~> 3.5'
-  s.dependency       'MRCircularProgressView', ':git => 'https://github.com/candyan/MRCircularProgressView.git', :tag => '0.2.0'
 end
