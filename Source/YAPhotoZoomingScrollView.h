@@ -8,9 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
-@class FFCircularProgressView;
+@class MRCircularProgressView;
 @class SDWebImageManager;
 @class YAPhotoZoomingScrollView;
+@class YAPhoto;
 
 @protocol YAPhotoZoomingScrollViewDelegate <NSObject>
 
@@ -29,12 +30,11 @@
 @interface YAPhotoZoomingScrollView : UIScrollView<UIScrollViewDelegate>
 
 @property (nonatomic, weak, readonly) UIImageView *photoImageView;
-@property (nonatomic, weak, readonly) FFCircularProgressView *progressView;
+@property (nonatomic, weak, readonly) MRCircularProgressView *progressView;
 
 @property (nonatomic, strong, readonly) SDWebImageManager *webImageManager;
 
-@property (nonatomic, strong) NSURL *photoURL;
-@property (nonatomic, strong) UIImage *photoImage;
+@property (nonatomic, strong) YAPhoto *photo;
 
 @property (nonatomic, weak) id<YAPhotoZoomingScrollViewDelegate> photoZoomingDelegate;
 

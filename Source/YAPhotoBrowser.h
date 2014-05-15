@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "YAPhoto.h"
 
 @class YAPhotoBrowser;
 @class SDWebImageManager;
@@ -44,7 +45,7 @@
 
 - (void)setShowPagesTip:(BOOL)show animated:(BOOL)flag;
 
-- (UIImage *)photoImageAtIndex:(NSUInteger)index;
+- (YAPhoto *)photoAtIndex:(NSUInteger)index;
 - (NSArray *)allPhotos;
 
 - (void)reloadCurrentPhotoPage;

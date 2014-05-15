@@ -7,8 +7,9 @@
 //
 
 #import "YAPhotoZoomingScrollView.h"
-#import "FFCircularProgressView.h"
+#import "MRCircularProgressView.h"
 #import "SDWebImageManager.h"
+#import "YAPhoto.h"
 
 @implementation YAPhotoZoomingScrollView
 
@@ -94,10 +95,10 @@
 }
 
 static CGFloat const kProgressViewSize = 50.0f;
-- (FFCircularProgressView *)progressView
+- (MRCircularProgressView *)progressView
 {
   if (!_progressView) {
-    FFCircularProgressView *cProgressView = [[FFCircularProgressView alloc] initWithFrame:CGRectMake(0, 0,
+    MRCircularProgressView *cProgressView = [[MRCircularProgressView alloc] initWithFrame:CGRectMake(0, 0,
                                                                                                      kProgressViewSize,
                                                                                                      kProgressViewSize)];
     [cProgressView setCenter:CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds))];
@@ -121,43 +122,51 @@ static CGFloat const kProgressViewSize = 50.0f;
 
 #pragma mark - setter
 
-- (void)setPhotoImage:(UIImage *)photoImage
+- (void)setPhoto:(YAPhoto *)photo
 {
-  _photoImage = photoImage;
-  [self _displayImage];
-}
+  _photo = photo;
 
-- (void)setPhotoURL:(NSURL *)photoURL
-{
-  _photoURL = photoURL;
-
-  if ([self.webImageManager diskImageExistsForURL:photoURL]) {
-    UIImage *image = [self.webImageManager.imageCache imageFromDiskCacheForKey:photoURL.absoluteString];
-    self.photoImage = image;
+  if (photo.displayPhoto) {
+    [self __displayImage];
   } else {
-    [self.progressView setHidden:NO];
-    [self.progressView setProgress:0.2];
+    if ([self.webImageManager diskImageExistsForURL:self.photo.photoURL]) {
+      UIImage *image = [self.webImageManager.imageCache imageFromDiskCacheForKey:self.photo.photoURL.absoluteString];
+      photo.displayPhoto = image;
+      [self __displayImage];
+    } else {
+      [self.progressView setHidden:NO];
 
-    if ([self.photoZoomingDelegate respondsToSelector:@selector(photoZoomingScrollView:willDownloadImage:downloadURL:)]) {
-      [self.photoZoomingDelegate photoZoomingScrollView:self
-                                      willDownloadImage:self.webImageManager
-                                            downloadURL:photoURL];
+      if ([self.photoZoomingDelegate respondsToSelector:@selector(photoZoomingScrollView:willDownloadImage:downloadURL:)]) {
+        [self.photoZoomingDelegate photoZoomingScrollView:self
+                                        willDownloadImage:self.webImageManager
+                                              downloadURL:self.photo.photoURL];
+      }
+      __weak typeof(self) weakSelf = self;
+      [self.webImageManager downloadWithURL:self.photo.photoURL
+                                    options:SDWebImageProgressiveDownload | SDWebImageRetryFailed
+                                   progress:^(NSInteger receivedSize, NSInteger expectedSize)
+       {
+         if (expectedSize > 0) {
+           dispatch_async(dispatch_get_main_queue(), ^{
+             CGFloat progress = ((CGFloat)receivedSize / (CGFloat)expectedSize);
+             [weakSelf.progressView setProgress:progress animated:YES];
+           });
+         }
+       } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished) {
+         if (finished) {
+           dispatch_async(dispatch_get_main_queue(), ^{
+             [weakSelf.progressView setProgress:1.0f animated:YES];
+             [weakSelf.progressView setHidden:YES];
+
+             weakSelf.photo.displayPhoto = image;
+
+             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+               [weakSelf __displayImage];
+             });
+           });
+         }
+       }];
     }
-    __weak typeof(self) weakSelf = self;
-    [self.webImageManager downloadWithURL:photoURL
-                                  options:SDWebImageProgressiveDownload | SDWebImageRetryFailed
-                                 progress:^(NSInteger receivedSize, NSInteger expectedSize)
-     {
-       if (expectedSize > 0) {
-         CGFloat progress = ((CGFloat)receivedSize / (CGFloat)expectedSize);
-         [weakSelf.progressView setProgress:progress];
-       }
-     } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished) {
-       if (finished) {
-         weakSelf.photoImage = image;
-         [weakSelf.progressView setHidden:YES];
-       }
-     }];
   }
 }
 
@@ -166,10 +175,9 @@ static CGFloat const kProgressViewSize = 50.0f;
 - (void)prepareForReuse
 {
   [self.webImageManager cancelAll];
-  [self.progressView setProgress:0.0];
+  [self.progressView setProgress:0.0f animated:NO];
   self.photoImageView.image = nil;
-  self.photoURL = nil;
-  self.photoImage = nil;
+  self.photo = nil;
 }
 
 #pragma mark - UIScrollViewDelegate
@@ -181,22 +189,26 @@ static CGFloat const kProgressViewSize = 50.0f;
 
 #pragma mark - display
 
-- (void)_displayImage
+- (void)__displayImage
 {
-  if (self.photoImage && self.photoImageView.image == nil) {
+  if (self.photo && self.photoImageView.image == nil) {
     self.maximumZoomScale = 1.0f;
     self.minimumZoomScale = 1.0f;
     self.zoomScale = 1.0f;
 
     self.contentSize = CGSizeZero;
 
-    self.photoImageView.image = self.photoImage;
+    UIImage *displayedImage = (self.photo.displayPhoto != nil
+                               ? self.photo.displayPhoto
+                               : self.photo.placeholderPhoto);
+
+    self.photoImageView.image = displayedImage;
     self.photoImageView.hidden = NO;
 
     // Setup photo frame
     CGRect photoImageViewFrame;
     photoImageViewFrame.origin = CGPointZero;
-    photoImageViewFrame.size = self.photoImage.size;
+    photoImageViewFrame.size = displayedImage.size;
 
     self.photoImageView.frame = photoImageViewFrame;
     self.contentSize = photoImageViewFrame.size;
@@ -267,7 +279,7 @@ static CGFloat const kProgressViewSize = 50.0f;
 
 - (void)_handleLongPressGR:(UILongPressGestureRecognizer *)longPressGR
 {
-  if (self.photoImage
+  if (self.photo.displayPhoto
       && [self.photoZoomingDelegate respondsToSelector:@selector(photoZoomingScrollView:longPressDetected:)]
       && longPressGR.state == UIGestureRecognizerStateBegan) {
     [self.photoZoomingDelegate photoZoomingScrollView:self
@@ -277,7 +289,7 @@ static CGFloat const kProgressViewSize = 50.0f;
 
 - (void)_handleDoubleTapGR:(UITapGestureRecognizer *)tapGR
 {
-  if (self.photoImage) {
+  if (self.photo.displayPhoto) {
     // Zoom
     if (self.zoomScale == self.maximumZoomScale) {
       // Zoom out

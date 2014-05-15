@@ -8,8 +8,8 @@
 
 #import "YAPhotoBrowser.h"
 #import "YAPhotoZoomingScrollView.h"
-#import "FFCircularProgressView.h"
 #import "SDImageCache.h"
+#import "MRCircularProgressView.h"
 
 @interface YAPhotoBrowser ()<UIScrollViewDelegate, YAPhotoZoomingScrollViewDelegate>
 {
@@ -169,7 +169,7 @@
 - (void)_performCloseAnimationWithScrollView:(YAPhotoZoomingScrollView *)scrollView
 {
   float fadeAlpha = 1 - abs(scrollView.frame.origin.y)/scrollView.frame.size.height;
-  UIImage *imageFromView = scrollView.photoImage;
+  UIImage *imageFromView = scrollView.photo.displayPhoto ? : scrollView.photo.placeholderPhoto;
   CGRect screenBound = [[UIScreen mainScreen] bounds];
   CGFloat screenWidth = screenBound.size.width;
   CGFloat screenHeight = screenBound.size.height;
@@ -325,7 +325,7 @@ static CGFloat const kScrollPagePadding = 10.0f;
   return _recycledPagesSet;
 }
 
-- (id)_photoAtIndex:(NSUInteger)index
+- (YAPhoto *)photoAtIndex:(NSUInteger)index
 {
   return index < self.photos.count ? self.photos[index] : nil;
 }
@@ -341,23 +341,6 @@ static CGFloat const kScrollPagePadding = 10.0f;
     if (page.tag == index) return page;
   }
   return nil;
-}
-
-- (UIImage *)photoImageAtIndex:(NSUInteger)index
-{
-  id photo = [self _photoAtIndex:index];
-  if ([photo isKindOfClass:[UIImage class]]) {
-    return photo;
-  } else if ([photo isKindOfClass:[NSURL class]]) {
-    YAPhotoZoomingScrollView *zoomingScrollView = [self _displayedPageAtIndex:index];
-    if (zoomingScrollView) {
-      return zoomingScrollView.photoImage;
-    } else {
-      return [[SDImageCache sharedImageCache] imageFromDiskCacheForKey:[photo absoluteString]];
-    }
-  } else {
-    return nil;
-  }
 }
 
 #pragma mark - setter
@@ -478,7 +461,7 @@ static CGFloat const kScrollPagePadding = 10.0f;
 
       // Add new page
       YAPhotoZoomingScrollView *page = [[YAPhotoZoomingScrollView alloc] init];
-      if (_progressTintColor) [page.progressView setTintColor:_progressTintColor];
+      if (self.progressTintColor) page.progressView.progressColor = self.progressTintColor;
       page.photoZoomingDelegate = self;
       page.backgroundColor = [UIColor clearColor];
       page.opaque = YES;
@@ -495,20 +478,14 @@ static CGFloat const kScrollPagePadding = 10.0f;
   page.frame = [self _frameForPageAtIndex:index];
   page.tag = index;
 
-  id photo = [self _photoAtIndex:index];
-  if (photo
-      && [photo isKindOfClass:[NSURL class]]) {
-    page.photoURL = photo;
-  } else {
-    page.photoImage = photo;
-  }
+  page.photo = [self photoAtIndex:index];
 }
 
 #pragma mark - setup
 
 - (void)_setupPagesTip
 {
-  [self.pagesLabel setText:[NSString stringWithFormat:@"%d / %d", self.currentPageIndex + 1, self.totalPages]];
+  [self.pagesLabel setText:[NSString stringWithFormat:@"%u / %lu", self.currentPageIndex + 1, (unsigned long)self.totalPages]];
 }
 
 #pragma mark - opinion

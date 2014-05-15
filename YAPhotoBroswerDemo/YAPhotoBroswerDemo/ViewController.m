@@ -48,7 +48,7 @@
   [presentFromViewButton setFrame:frame];
 
   [presentFromViewButton setImageWithURL:[NSURL URLWithString:@"http://img3.douban.com/view/status/raw/public/b3f5110ae68a375.jpg"]
-                        forState:UIControlStateNormal];
+                                forState:UIControlStateNormal];
   [presentFromViewButton addTarget:self
                             action:@selector(handlePresentWithViewButtonTapAction:)
                   forControlEvents:UIControlEventTouchUpInside];
@@ -69,9 +69,13 @@
 
 - (IBAction)handlePresentButtonTapAction:(id)sender
 {
-  NSArray *photoArray = @[[NSURL URLWithString:@"http://img3.douban.com/view/status/raw/public/b3f5110ae68a375.jpg"],
-                          [NSURL URLWithString:@"http://img3.douban.com/view/photo/photo/public/p2167975963.jpg"],
-                          [NSURL URLWithString:@"http://img3.douban.com/view/photo/photo/public/p2167975970.jpg"]];
+  id (^createPhoto)(NSString *photoURLStr) = ^id (NSString *photoURLStr) {
+    return [[YAPhoto alloc] initWithURL:[NSURL URLWithString:photoURLStr]
+                            placeholder:nil];
+  };
+  NSArray *photoArray = @[createPhoto(@"http://img3.douban.com/view/status/raw/public/b3f5110ae68a375.jpg"),
+                          createPhoto(@"http://img3.douban.com/view/photo/photo/public/p2167975963.jpg"),
+                          createPhoto(@"http://img3.douban.com/view/photo/photo/public/p2167975970.jpg")];
   YAPhotoBrowser *photoBrowser = [[YAPhotoBrowser alloc] initWithPhotoArray:photoArray];
   photoBrowser.delegate = self;
   [self presentViewController:photoBrowser
@@ -81,9 +85,14 @@
 
 - (IBAction)handlePresentWithViewButtonTapAction:(id)sender
 {
-  NSArray *photoArray = @[[NSURL URLWithString:@"http://img3.douban.com/view/status/raw/public/b3f5110ae68a375.jpg"],
-                          [NSURL URLWithString:@"http://img3.douban.com/view/photo/photo/public/p2167975963.jpg"],
-                          [NSURL URLWithString:@"http://img3.douban.com/view/photo/photo/public/p2167975970.jpg"]];
+  id (^createPhoto)(NSString *photoURLStr) = ^id (NSString *photoURLStr) {
+    return [[YAPhoto alloc] initWithURL:[NSURL URLWithString:photoURLStr]
+                            placeholder:nil];
+  };
+  NSArray *photoArray = @[createPhoto(@"http://img3.douban.com/view/status/raw/public/b3f5110ae68a375.jpg"),
+                          createPhoto(@"http://img3.douban.com/view/photo/photo/public/p2167975963.jpg"),
+                          createPhoto(@"http://img3.douban.com/view/photo/photo/public/p2167975970.jpg")];
+
   YAPhotoBrowser *photoBrowser = [[YAPhotoBrowser alloc] initWithPhotoArray:photoArray
                                                            animatedFromView:sender];
   photoBrowser.delegate = self;

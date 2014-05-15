@@ -10,5 +10,5 @@ Pod::Spec.new do |s|
   s.source_files  =  'Source/*.{h,m}'
   s.requires_arc  =  true
   s.dependency       'SDWebImage', '~> 3.5'
-  s.dependency       'FFCircularProgressView', '~> 0.3'
+  s.dependency       'MRCircularProgressView', ':git => 'https://github.com/candyan/MRCircularProgressView.git', :tag => '0.2.0'
 end
