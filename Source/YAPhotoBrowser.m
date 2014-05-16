@@ -412,6 +412,10 @@ static CGFloat const kScrollPagePadding = 10.0f;
 
   _currentPageIndex = index;
   [self _setupPagesTip];
+
+  if ([self.delegate respondsToSelector:@selector(photoBrowser:willDisplayPhotoAtPageIndex:)]) {
+    [self.delegate photoBrowser:self willDisplayPhotoAtPageIndex:index];
+  }
 }
 
 #pragma mark - Display
@@ -454,11 +458,6 @@ static CGFloat const kScrollPagePadding = 10.0f;
   // Add missing pages
   for (NSUInteger index = (NSUInteger)iFirstIndex; index <= (NSUInteger)iLastIndex; index++) {
     if (![self _isDisplayingPageForIndex:index]) {
-
-      if ([self.delegate respondsToSelector:@selector(photoBrowser:willDisplayPhotoAtPageIndex:)]) {
-        [self.delegate photoBrowser:self willDisplayPhotoAtPageIndex:index];
-      }
-
       // Add new page
       YAPhotoZoomingScrollView *page = [[YAPhotoZoomingScrollView alloc] init];
       if (self.progressTintColor) page.progressView.progressColor = self.progressTintColor;
