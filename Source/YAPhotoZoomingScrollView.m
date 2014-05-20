@@ -54,7 +54,7 @@
 
 - (void)layoutSubviews {
 	// Update tap view frame
-//	_tapView.frame = self.bounds;
+  //	_tapView.frame = self.bounds;
 
 	// Super
 	[super layoutSubviews];
@@ -88,8 +88,8 @@
 {
   if (!_photoImageView) {
     UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectZero];
-    [self addSubview:imageView];
     _photoImageView = imageView;
+    [self insertSubview:imageView atIndex:0];
   }
   return _photoImageView;
 }
@@ -106,6 +106,8 @@ static CGFloat const kProgressViewSize = 50.0f;
                                         | UIViewAutoresizingFlexibleBottomMargin
                                         | UIViewAutoresizingFlexibleLeftMargin
                                         | UIViewAutoresizingFlexibleRightMargin)];
+    cProgressView.backgroundColor = [UIColor clearColor];
+
     [self addSubview:cProgressView];
     _progressView = cProgressView;
   }
@@ -126,47 +128,42 @@ static CGFloat const kProgressViewSize = 50.0f;
 {
   _photo = photo;
 
-  if (photo.displayPhoto) {
-    [self __displayImage];
-  } else {
-    if ([self.webImageManager diskImageExistsForURL:self.photo.photoURL]) {
-      UIImage *image = [self.webImageManager.imageCache imageFromDiskCacheForKey:self.photo.photoURL.absoluteString];
-      photo.displayPhoto = image;
-      [self __displayImage];
-    } else {
-      [self.progressView setHidden:NO];
+  [self __displayImage];
 
-      if ([self.photoZoomingDelegate respondsToSelector:@selector(photoZoomingScrollView:willDownloadImage:downloadURL:)]) {
-        [self.photoZoomingDelegate photoZoomingScrollView:self
-                                        willDownloadImage:self.webImageManager
-                                              downloadURL:self.photo.photoURL];
-      }
-      __weak typeof(self) weakSelf = self;
-      [self.webImageManager downloadWithURL:self.photo.photoURL
-                                    options:SDWebImageProgressiveDownload | SDWebImageRetryFailed
-                                   progress:^(NSInteger receivedSize, NSInteger expectedSize)
-       {
-         if (expectedSize > 0) {
-           dispatch_async(dispatch_get_main_queue(), ^{
-             CGFloat progress = ((CGFloat)receivedSize / (CGFloat)expectedSize);
-             [weakSelf.progressView setProgress:progress animated:YES];
-           });
-         }
-       } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished) {
-         if (finished) {
-           dispatch_async(dispatch_get_main_queue(), ^{
-             [weakSelf.progressView setProgress:1.0f animated:YES];
-             [weakSelf.progressView setHidden:YES];
+  if (photo.displayPhoto == nil) {
+    [self.progressView setHidden:NO];
 
-             weakSelf.photo.displayPhoto = image;
-
-             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-               [weakSelf __displayImage];
-             });
-           });
-         }
-       }];
+    if ([self.photoZoomingDelegate respondsToSelector:@selector(photoZoomingScrollView:willDownloadImage:downloadURL:)]) {
+      [self.photoZoomingDelegate photoZoomingScrollView:self
+                                      willDownloadImage:self.webImageManager
+                                            downloadURL:self.photo.photoURL];
     }
+    __weak typeof(self) weakSelf = self;
+    [self.webImageManager downloadWithURL:self.photo.photoURL
+                                  options:SDWebImageProgressiveDownload | SDWebImageRetryFailed
+                                 progress:^(NSInteger receivedSize, NSInteger expectedSize)
+     {
+       if (expectedSize > 0) {
+         dispatch_async(dispatch_get_main_queue(), ^{
+           CGFloat progress = ((CGFloat)receivedSize / (CGFloat)expectedSize);
+           [weakSelf.progressView setProgress:progress animated:YES];
+         });
+       }
+     } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished) {
+       if (finished) {
+         dispatch_async(dispatch_get_main_queue(), ^{
+           [weakSelf.progressView setProgress:1.0f animated:YES];
+           [weakSelf.progressView setHidden:YES];
+
+           weakSelf.photo.displayPhoto = image;
+
+           dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+             weakSelf.photoImageView.image = nil;
+             [weakSelf __displayImage];
+           });
+         });
+       }
+     }];
   }
 }
 
