@@ -110,6 +110,7 @@ static CGFloat const kProgressViewSize = 50.0f;
 
     [self addSubview:cProgressView];
     _progressView = cProgressView;
+    _progressView.hidden = YES;
   }
   return _progressView;
 }
