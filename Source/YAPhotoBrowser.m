@@ -67,6 +67,8 @@
     _scaleImage = nil;
     _useWhiteBackgroundColor = NO;
     _backgroundScaleFactor = 1.0;
+    _progressSize = CGSizeMake(50, 50);
+    _progressCenterOffset = CGVectorMake(0, 0);
   }
   return self;
 }
@@ -87,7 +89,7 @@
 {
   id currentSelf = [self initWithPhotoArray:photoArray];
   _senderViewForAnimation = view;
-  
+
   return currentSelf;
 }
 
@@ -100,7 +102,7 @@
 {
   id currentSelf = [self initWithPhotoURLArray:photoURLArray];
   _senderViewForAnimation = view;
-  
+
   return currentSelf;
 }
 
@@ -134,17 +136,17 @@
   self.view.alpha = 0.0f;
 
   UIImage *imageFromView = _scaleImage ? _scaleImage : [self _getImageFromView:_senderViewForAnimation];
-  
+
   _resizableImageViewFrame = [_senderViewForAnimation.superview convertRect:_senderViewForAnimation.frame toView:nil];
-  
+
   CGRect screenBound = [[UIScreen mainScreen] bounds];
   CGFloat screenWidth = screenBound.size.width;
   CGFloat screenHeight = screenBound.size.height;
-  
+
   UIView *fadeView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, screenWidth, screenHeight)];
   fadeView.backgroundColor = [UIColor clearColor];
   [_applicationWindow addSubview:fadeView];
-  
+
   UIImageView *resizableImageView = [[UIImageView alloc] initWithImage:imageFromView];
   resizableImageView.frame = _resizableImageViewFrame;
   resizableImageView.clipsToBounds = YES;
@@ -152,7 +154,7 @@
   resizableImageView.backgroundColor = [UIColor colorWithWhite:((_useWhiteBackgroundColor) ? 1 : 0) alpha:1];
   [_applicationWindow addSubview:resizableImageView];
   _senderViewForAnimation.hidden = YES;
-  
+
   [UIView animateWithDuration:_animationDuration animations:^{
     fadeView.backgroundColor = _useWhiteBackgroundColor ? [UIColor whiteColor] : [UIColor blackColor];
 
@@ -185,7 +187,7 @@
   resizableImageView.clipsToBounds = YES;
   [_applicationWindow addSubview:resizableImageView];
   self.view.hidden = YES;
-  
+
   [UIView animateWithDuration:_animationDuration animations:^{
     [_applicationRootViewController.view setTransform:CGAffineTransformIdentity];
     resizableImageView.layer.frame = _resizableImageViewFrame;
@@ -225,11 +227,11 @@
 - (void)viewDidLoad
 {
   [super viewDidLoad];
-  
+
   if (_senderViewForAnimation != nil) {
     [self _performAnimation];
   }
-  
+
   if (_showPagesTip) {
     [self _setupPagesTip];
   }
@@ -478,6 +480,15 @@ static CGFloat const kScrollPagePadding = 10.0f;
   page.tag = index;
 
   page.photo = [self photoAtIndex:index];
+
+  CGRect frame = page.progressView.frame;
+  frame.size.width = self.progressSize.width;
+  frame.size.height = self.progressSize.height;
+  page.progressView.frame = frame;
+
+  CGPoint center = CGPointMake(CGRectGetMidX(self.view.bounds) + self.progressCenterOffset.dx,
+                               CGRectGetMidY(self.view.bounds) + self.progressCenterOffset.dy);
+  page.progressView.center = center;
 }
 
 #pragma mark - setup

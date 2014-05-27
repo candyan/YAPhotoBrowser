@@ -33,6 +33,8 @@
 @property (nonatomic, assign) BOOL showPagesTip;
 
 @property (nonatomic, strong) UIColor *progressTintColor;
+@property (nonatomic, assign) CGVector progressCenterOffset;
+@property (nonatomic, assign) CGSize progressSize;
 
 @property (nonatomic, weak, readonly) UILabel *pagesLabel;
 
