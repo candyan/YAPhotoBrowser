@@ -140,9 +140,9 @@ static CGFloat const kProgressViewSize = 50.0f;
                                             downloadURL:self.photo.photoURL];
     }
     __weak typeof(self) weakSelf = self;
-    [self.webImageManager downloadWithURL:self.photo.photoURL
-                                  options:SDWebImageProgressiveDownload | SDWebImageRetryFailed
-                                 progress:^(NSInteger receivedSize, NSInteger expectedSize)
+    [self.webImageManager downloadImageWithURL:self.photo.photoURL
+                                       options:SDWebImageProgressiveDownload | SDWebImageRetryFailed
+                                      progress:^(NSInteger receivedSize, NSInteger expectedSize)
      {
        if (expectedSize > 0) {
          dispatch_async(dispatch_get_main_queue(), ^{
@@ -150,7 +150,7 @@ static CGFloat const kProgressViewSize = 50.0f;
            [weakSelf.progressView setProgress:progress animated:YES];
          });
        }
-     } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished) {
+     } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
        if (finished) {
          dispatch_async(dispatch_get_main_queue(), ^{
            [weakSelf.progressView setProgress:1.0f animated:YES];
