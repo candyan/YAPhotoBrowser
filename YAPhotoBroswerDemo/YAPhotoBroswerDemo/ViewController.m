@@ -24,6 +24,7 @@
 
   [[SDImageCache sharedImageCache] clearDisk];
 
+  NSString *photoURL = @"http://img3.douban.com/view/status/raw/public/b3f5110ae68a375.jpg";
   UIButton *presentButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 50, 150, 150)];
   [presentButton setAutoresizingMask:(UIViewAutoresizingFlexibleBottomMargin
                                       | UIViewAutoresizingFlexibleLeftMargin
@@ -33,8 +34,8 @@
           forControlEvents:UIControlEventTouchUpInside];
 
   [presentButton setCenter:CGPointMake(CGRectGetMidX(self.view.bounds), presentButton.center.y)];
-  [presentButton setImageWithURL:[NSURL URLWithString:@"http://img3.douban.com/view/status/raw/public/b3f5110ae68a375.jpg"]
-                        forState:UIControlStateNormal];
+  [presentButton sd_setImageWithURL:[NSURL URLWithString:photoURL]
+                           forState:UIControlStateNormal];
 
   [self.view addSubview:presentButton];
 
@@ -47,8 +48,8 @@
   frame.origin.y = 250;
   [presentFromViewButton setFrame:frame];
 
-  [presentFromViewButton setImageWithURL:[NSURL URLWithString:@"http://img3.douban.com/view/status/raw/public/b3f5110ae68a375.jpg"]
-                                forState:UIControlStateNormal];
+  [presentFromViewButton sd_setImageWithURL:[NSURL URLWithString:photoURL]
+                                   forState:UIControlStateNormal];
   [presentFromViewButton addTarget:self
                             action:@selector(handlePresentWithViewButtonTapAction:)
                   forControlEvents:UIControlEventTouchUpInside];
@@ -69,14 +70,10 @@
 
 - (IBAction)handlePresentButtonTapAction:(id)sender
 {
-  id (^createPhoto)(NSString *photoURLStr) = ^id (NSString *photoURLStr) {
-    return [[YAPhoto alloc] initWithURL:[NSURL URLWithString:photoURLStr]
-                            placeholder:nil];
-  };
-  NSArray *photoArray = @[createPhoto(@"http://img3.douban.com/view/status/raw/public/b3f5110ae68a375.jpg"),
-                          createPhoto(@"http://img3.douban.com/view/photo/photo/public/p2167975963.jpg"),
-                          createPhoto(@"http://img3.douban.com/view/photo/photo/public/p2167975970.jpg")];
-  YAPhotoBrowser *photoBrowser = [[YAPhotoBrowser alloc] initWithPhotoArray:photoArray];
+  NSArray *photoArray = @[@"http://img3.douban.com/view/status/raw/public/b3f5110ae68a375.jpg",
+                          @"http://img3.douban.com/view/photo/photo/public/p2167975963.jpg",
+                          @"http://img3.douban.com/view/photo/photo/public/p2167975970.jpg"];
+  YAPhotoBrowser *photoBrowser = [[YAPhotoBrowser alloc] initWithPhotoURLArray:photoArray];
   photoBrowser.delegate = self;
   [self presentViewController:photoBrowser
                      animated:YES
@@ -85,16 +82,12 @@
 
 - (IBAction)handlePresentWithViewButtonTapAction:(id)sender
 {
-  id (^createPhoto)(NSString *photoURLStr) = ^id (NSString *photoURLStr) {
-    return [[YAPhoto alloc] initWithURL:[NSURL URLWithString:photoURLStr]
-                            placeholder:nil];
-  };
-  NSArray *photoArray = @[createPhoto(@"http://img3.douban.com/view/status/raw/public/b3f5110ae68a375.jpg"),
-                          createPhoto(@"http://img3.douban.com/view/photo/photo/public/p2167975963.jpg"),
-                          createPhoto(@"http://img3.douban.com/view/photo/photo/public/p2167975970.jpg")];
+  NSArray *photoArray = @[@"http://img3.douban.com/view/status/raw/public/b3f5110ae68a375.jpg",
+                          @"http://img3.douban.com/view/photo/photo/public/p2167975963.jpg",
+                          @"http://img3.douban.com/view/photo/photo/public/p2167975970.jpg"];
 
-  YAPhotoBrowser *photoBrowser = [[YAPhotoBrowser alloc] initWithPhotoArray:photoArray
-                                                           animatedFromView:sender];
+  YAPhotoBrowser *photoBrowser = [[YAPhotoBrowser alloc] initWithPhotoURLArray:photoArray
+                                                              animatedFromView:sender];
   photoBrowser.delegate = self;
   [self presentViewController:photoBrowser
                      animated:YES

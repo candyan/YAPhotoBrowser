@@ -46,8 +46,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		35F2CE3921E8085AB5408CB9 /* Pods-YAPhotoBroswerDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-YAPhotoBroswerDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-YAPhotoBroswerDemo/Pods-YAPhotoBroswerDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		43DAEF68FD0E4B088E71CCE9 /* libPods-YAPhotoBroswerDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-YAPhotoBroswerDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4D4BC4A6B2934CC5945A4488 /* Pods-YAPhotoBroswerDemo.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-YAPhotoBroswerDemo.xcconfig"; path = "Pods/Pods-YAPhotoBroswerDemo.xcconfig"; sourceTree = "<group>"; };
+		71D309FE1FAB25F9996E61F6 /* Pods-YAPhotoBroswerDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-YAPhotoBroswerDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-YAPhotoBroswerDemo/Pods-YAPhotoBroswerDemo.release.xcconfig"; sourceTree = "<group>"; };
 		751EE04F1924AD1200EAC57F /* YAPhoto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YAPhoto.h; sourceTree = "<group>"; };
 		751EE0501924AD1200EAC57F /* YAPhoto.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YAPhoto.m; sourceTree = "<group>"; };
 		75434522186813C100B70D93 /* YAPhotoBroswerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YAPhotoBroswerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -115,7 +116,7 @@
 				7543454D186813C100B70D93 /* YAPhotoBroswerDemoTests */,
 				75434524186813C100B70D93 /* Frameworks */,
 				75434523186813C100B70D93 /* Products */,
-				4D4BC4A6B2934CC5945A4488 /* Pods-YAPhotoBroswerDemo.xcconfig */,
+				D147FD48E9ECC42EC142989D /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -214,6 +215,15 @@
 			path = ../../Source;
 			sourceTree = "<group>";
 		};
+		D147FD48E9ECC42EC142989D /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				35F2CE3921E8085AB5408CB9 /* Pods-YAPhotoBroswerDemo.debug.xcconfig */,
+				71D309FE1FAB25F9996E61F6 /* Pods-YAPhotoBroswerDemo.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -260,7 +270,7 @@
 		7543451A186813C100B70D93 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0610;
 				ORGANIZATIONNAME = liuyan;
 				TargetAttributes = {
 					75434545186813C100B70D93 = {
@@ -344,7 +354,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Pods-YAPhotoBroswerDemo-resources.sh\"\n";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-YAPhotoBroswerDemo/Pods-YAPhotoBroswerDemo-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -421,7 +431,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -461,7 +470,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -493,7 +501,7 @@
 		};
 		75434558186813C100B70D93 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4D4BC4A6B2934CC5945A4488 /* Pods-YAPhotoBroswerDemo.xcconfig */;
+			baseConfigurationReference = 35F2CE3921E8085AB5408CB9 /* Pods-YAPhotoBroswerDemo.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -508,7 +516,7 @@
 		};
 		75434559186813C100B70D93 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4D4BC4A6B2934CC5945A4488 /* Pods-YAPhotoBroswerDemo.xcconfig */;
+			baseConfigurationReference = 71D309FE1FAB25F9996E61F6 /* Pods-YAPhotoBroswerDemo.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -524,7 +532,6 @@
 		7543455B186813C100B70D93 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/YAPhotoBroswerDemo.app/YAPhotoBroswerDemo";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
@@ -547,7 +554,6 @@
 		7543455C186813C100B70D93 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/YAPhotoBroswerDemo.app/YAPhotoBroswerDemo";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",

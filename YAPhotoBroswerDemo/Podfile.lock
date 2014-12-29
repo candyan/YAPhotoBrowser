@@ -1,23 +1,28 @@
 PODS:
   - MDRadialProgress (0.4.0)
   - MRCircularProgressView (0.2.0)
-  - SDWebImage (3.5.4):
-    - SDWebImage/Core
-  - SDWebImage/Core (3.5.4)
+  - SDWebImage (3.7.1):
+    - SDWebImage/Core (= 3.7.1)
+  - SDWebImage/Core (3.7.1)
 
 DEPENDENCIES:
   - MDRadialProgress (~> 0.4.0)
   - MRCircularProgressView (from `https://github.com/candyan/MRCircularProgressView.git`, tag `0.2.0`)
-  - SDWebImage (~> 3.5.1)
+  - SDWebImage (~> 3.7)
 
 EXTERNAL SOURCES:
   MRCircularProgressView:
     :git: https://github.com/candyan/MRCircularProgressView.git
     :tag: 0.2.0
 
-SPEC CHECKSUMS:
-  MDRadialProgress: 2091ae1a17f591d84ef73dc3c9bb1a844f51bc1c
-  MRCircularProgressView: 0ffe142fb10034a653eb32cd38f6737dfe0168ac
-  SDWebImage: 1a62010700adbba823b621fc217906739dbf6aa5
+CHECKOUT OPTIONS:
+  MRCircularProgressView:
+    :git: https://github.com/candyan/MRCircularProgressView.git
+    :tag: 0.2.0
 
-COCOAPODS: 0.32.1
+SPEC CHECKSUMS:
+  MDRadialProgress: cff554a91c41fb9be833cc62e2ca81af34c7c460
+  MRCircularProgressView: 0ffe142fb10034a653eb32cd38f6737dfe0168ac
+  SDWebImage: 116e88633b5b416ea0ca4b334a4ac59cf72dd38d
+
+COCOAPODS: 0.35.0

@@ -95,7 +95,12 @@
 
 - (instancetype)initWithPhotoURLArray:(NSArray *)photoURLArray
 {
-  return [self initWithPhotoArray:photoURLArray];
+  NSMutableArray *photoArray = [[NSMutableArray alloc] init];
+  for (NSURL *url in photoURLArray) {
+    YAPhoto *photo = [[YAPhoto alloc] initWithURL:url placeholder:nil];
+    [photoArray addObject:photo];
+  }
+  return [self initWithPhotoArray:photoArray];
 }
 
 - (instancetype)initWithPhotoURLArray:(NSArray *)photoURLArray animatedFromView:(UIView *)view
