@@ -19,8 +19,8 @@
 - (void)photoBrowser:(YAPhotoBrowser *)photoBrowser didDismissAtPageIndex:(NSUInteger)index;
 - (void)photoBrowser:(YAPhotoBrowser *)photoBrowser longPressActionAtIndex:(NSUInteger)index;
 - (void)photoBrowser:(YAPhotoBrowser *)photoBrowser
-   willDownloadImage:(SDWebImageManager *)webImageManager
-         downloadURL:(NSURL *)URL;
+    willDownloadImage:(SDWebImageManager *)webImageManager
+          downloadURL:(NSURL *)URL;
 - (void)photoBrowser:(YAPhotoBrowser *)photoBrowser willDisplayPhotoAtPageIndex:(NSUInteger)index;
 
 @end
@@ -31,6 +31,7 @@
 @property (nonatomic, assign) NSUInteger totalPages;
 
 @property (nonatomic, assign) BOOL showPagesTip;
+@property (nonatomic, assign) BOOL closeWhenSingleTap;
 
 @property (nonatomic, strong) UIColor *progressTintColor;
 @property (nonatomic, assign) CGVector progressCenterOffset;
@@ -41,9 +42,9 @@
 @property (nonatomic, weak) id<YAPhotoBrowserDelegate> delegate;
 
 - (instancetype)initWithPhotoArray:(NSArray *)photoArray;
-- (instancetype)initWithPhotoArray:(NSArray *)photoArray animatedFromView:(UIView*)view;
+- (instancetype)initWithPhotoArray:(NSArray *)photoArray animatedFromView:(UIView *)view;
 - (instancetype)initWithPhotoURLArray:(NSArray *)photoURLArray;
-- (instancetype)initWithPhotoURLArray:(NSArray *)photoURLArray animatedFromView:(UIView*)view;
+- (instancetype)initWithPhotoURLArray:(NSArray *)photoURLArray animatedFromView:(UIView *)view;
 
 - (void)setShowPagesTip:(BOOL)show animated:(BOOL)flag;
 
@@ -51,5 +52,7 @@
 - (NSArray *)allPhotos;
 
 - (void)reloadCurrentPhotoPage;
+
+- (void)dismiss;
 
 @end
